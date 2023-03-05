@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>rxmysondygo</title>
+		<meta charset="utf-8">
+		 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+			integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+			crossorigin=""/>
+		<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+			integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+			crossorigin=""></script>
+		<script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
+		<style>
+			html { font-family: Arial, Helvetica, sans-serif; }
+			#map { height: 800px; }
+			table {margin-bottom:10px; border-collapse: collapse; }
+			table, th, td { border: 1px solid }
+			table thead {background-color:gray;color:white}
+			table tbody tr td:nth-child(2) {text-align:right}
+			table tbody tr td:nth-child(4) {text-align:right}
+			table tbody tr td:nth-child(5) {text-align:right}
+			table tbody tr td:nth-child(6) {text-align:right}
+		</style>
+		<script>
+"strict"
+var map;
+var last='';
+var n=0;
+var colors=[
+	'blue',
+	'cyan',
+	'green',
+	'purple',
+	'red',
+	'yellow'
+];
+var data=[];
+
+function updateTable() {
+	for (id in data) {
+		var row=$(`#${id}`);
+		if (row.length==0) {
+			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+			$('table tbody').append(row);
+		}
+		row.attr('id',id);
+		var cells=row.find('td');
+		var i=data[id].frames.length-1;
+		$(cells[0]).html(data[id].type);
+		$(cells[1]).html(data[id].freq);
+		$(cells[2]).html(id);
+		$(cells[3]).html(data[id].frames[i].lat);
+		$(cells[4]).html(data[id].frames[i].lon);
+		$(cells[5]).html(data[id].frames[i].alt);
+	}
+}
+
+function getData() {
+	var url=new URL(window.location.href);
+	url.port=5556;
+	url.pathname='data';
+	$.getJSON({
+		url:url,
+		data:{from:last}
+	}).done(function(newData) {
+		console.log(newData);
+		for (id in newData) {
+			if (data[id]==null) {
+				data[id]=newData[id];
+				var color=colors[n++];
+				var d=newData[id].frames;
+				points=d.map(x=>[x.lat,x.lon]);
+				data[id].path=L.polyline(points, {color: color}).addTo(map);
+				if (points.length>0) {
+					var icon=L.icon({
+						iconUrl:`balloon-${color}.png`,
+						iconSize:[48,92],
+						iconAnchor: [24,92]
+					});
+					data[id].marker=L.marker(points[points.length-1],{icon:icon}).addTo(map);
+					last=newData[id].frames[points.length-1].datetime;
+					updateTable();
+				}
+			}
+			else {
+				var frames=newData[id].frames;
+				for (i in frames)
+					data[id].path.addLatLng([frames[i].lat,frames[i].lon])
+//~ 				data[id].path.redraw();
+				var i=frames.length-1;
+				if (i>=0) {
+					data[id].frames.push(...newData[id].frames);
+					var position=L.latLng(frames[i].lat,frames[i].lon);
+					console.log('position: ',position,frames[i]);
+					data[id].marker.setLatLng(position);
+					last=newData[id].frames[i].datetime;
+					updateTable();
+				}
+			}
+		}
+	}).fail(function(jqxhr, textStatus, error ) {
+		console.log(textStatus,error);
+	}).always(function() {
+		setTimeout(getData,3000);
+	});
+//~ 	last=new Date().toISOString()
+}
+
+$(document).ready(function() {
+	map = L.map('map').setView([44.4, 7.6], 11);
+	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	getData();
+});
+		</script>
+	</head>
+	<body>
+		<table>
+			<thead>
+				<tr>
+					<th>Type</th>
+					<th>Freq</th>
+					<th>ID</th>
+					<th>Lat</th>
+					<th>Lon</th>
+					<th>Alt</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		<div id="map"></div>
+	</body>
+</html>

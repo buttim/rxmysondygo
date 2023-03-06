@@ -53,6 +53,9 @@ class MyServer(SimpleHTTPRequestHandler):
                 }
                 self.wfile.write(bytes(json.dumps(res, default=json_serial),
                                  "utf-8"))
+            elif self.path == '/':
+                self.path = "web/rxmysondygo.html"
+                http.server.SimpleHTTPRequestHandler.do_GET(self)
             elif self.path.strip('/') in files:
                 self.path = "web" + self.path
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
@@ -131,6 +134,8 @@ try:
                 if (a[0] != '1'):
                     continue
                 id = a[3]
+                if id == 'No data':
+                    continue
                 frame = {
                     'datetime': datetime.now().isoformat() + 'Z',
                     'lat': float(a[4]),

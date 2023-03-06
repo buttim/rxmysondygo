@@ -4,9 +4,10 @@ import os
 import sys
 import time
 import threading
+import http.server
 from datetime import datetime
 from datetime import date
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 
@@ -15,6 +16,7 @@ hostName = "0.0.0.0"
 serverPort = 5556
 data = {}
 fine = False
+files = []
 
 
 def json_serial(obj):
@@ -25,7 +27,7 @@ def json_serial(obj):
     raise TypeError("Type %s not serializable" % type(obj))
 
 
-class MyServer(BaseHTTPRequestHandler):
+class MyServer(SimpleHTTPRequestHandler):
     protocol_version = "HTTP/1.0"
 
     def do_GET(self):
@@ -51,12 +53,15 @@ class MyServer(BaseHTTPRequestHandler):
                 }
                 self.wfile.write(bytes(json.dumps(res, default=json_serial),
                                  "utf-8"))
+            elif self.path.strip('/') in files:
+                self.path = "web" + self.path
+                http.server.SimpleHTTPRequestHandler.do_GET(self)
             else:
                 self.send_response(404)
                 self.end_headers()
         except Exception as x:
             exc_type, exc_obj, exc_tb = sys.exc_info()
-            print("line "+exc_tb.tb_lineno+": "+x, file=sys.stderr)
+            print("line "+str(exc_tb.tb_lineno)+": "+str(x), file=sys.stderr)
             sys.stderr.flush()
 
 
@@ -77,6 +82,9 @@ def webServerThread():
 if len(sys.argv) < 2:
     print("specificare i nomi delle porte seriali")
     exit(1)
+
+files = os.listdir(os.getcwd() + "/web")
+
 t = threading.Thread(target=webServerThread)
 t.start()
 

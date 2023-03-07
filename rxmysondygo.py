@@ -29,6 +29,9 @@ def json_serial(obj):
 
 class MyServer(SimpleHTTPRequestHandler):
     protocol_version = "HTTP/1.0"
+    
+    def log_message(self, format, *args):
+        pass
 
     def do_GET(self):
         try:

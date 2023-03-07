@@ -59,7 +59,8 @@ function updateTable() {
 
 function getData() {
 	var url=new URL(window.location.href);
-	url.pathname='rxmysondygo/data';
+	
+	url.pathname=url.pathname.replace(/\/[^\/]*$/,'/data');
 	$.getJSON({
 		url:url,
 		data:{from:last}

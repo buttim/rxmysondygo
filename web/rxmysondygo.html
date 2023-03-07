@@ -42,7 +42,7 @@ function updateTable() {
 	for (id in data) {
 		var row=$(`#${id}`);
 		if (row.length==0) {
-			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
 			$('table tbody').append(row);
 		}
 		row.attr('id',id);
@@ -54,6 +54,7 @@ function updateTable() {
 		$(cells[3]).html(data[id].frames[i].lat);
 		$(cells[4]).html(data[id].frames[i].lon);
 		$(cells[5]).html(data[id].frames[i].alt);
+		$(cells[6]).html(data[id].frames[i].rssi);
 	}
 }
 
@@ -129,6 +130,7 @@ $(document).ready(function() {
 					<th>Lat</th>
 					<th>Lon</th>
 					<th>Alt</th>
+					<th>RSSI</th>
 				</tr>
 			</thead>
 			<tbody>

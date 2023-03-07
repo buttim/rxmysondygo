@@ -141,6 +141,7 @@ try:
                     'lat': float(a[4]),
                     'lon': float(a[5]),
                     'alt': float(a[6]),
+                    'rssi':float(a[8])
                 }
             if (id not in data):
                 if isFile:

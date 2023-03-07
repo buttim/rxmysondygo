@@ -131,7 +131,7 @@ try:
                 print(frame)
                 time.sleep(0.1)
             else:
-                if (a[0] != '1'):
+                if (a[0] != '1') or float(a[4]) == 0:
                     continue
                 id = a[3]
                 if id == 'No data':

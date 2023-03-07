@@ -4,18 +4,20 @@
 		<title>rxmysondygo</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes" />
-		 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.css" type="text/css" media="all" /> 
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
 			integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
 			crossorigin=""/>
+		<script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
 		<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
 			integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
 			crossorigin=""></script>
-		<script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" type="text/javascript"></script>
 		<style>
 			html, body, table, #map {margin:0;padding:0}
 			html { font-family: Arial, Helvetica, sans-serif; }
-			#map { height: 90vh }
-			table { height:10vh; border-collapse: collapse; width:100%}
+			#map { height: 90vh; clear:both }
+			table { height:10vh; border-collapse: collapse; width:80%;float:left }
 			table, th, td { border: 1px solid }
 			table thead {background-color:gray;color:white}
 			table tbody tr td {text-align:center}
@@ -24,6 +26,14 @@
 			table tbody tr td:nth-child(5) {text-align:right}
 			table tbody tr td:nth-child(6) {text-align:right}
 			table tbody tr td:nth-child(7) {text-align:right}
+			fieldset {
+				margin: 10px;
+				padding: 0 10px 10px;
+				border: 1px solid #666;
+				border-radius: 8px;
+				padding-top: 10px;
+			}
+			.ui-dialog { z-index: 1000 !important ;}
 		</style>
 		<script>
 "strict"
@@ -112,6 +122,52 @@ function getData() {
 }
 
 $(document).ready(function() {
+	$('#configura').button();
+	$( "#dialog" ).dialog({
+		autoOpen:false,
+		modal: true,
+		minHeight: 300,
+		minWidth: 400,
+		close: function() {
+			$('#dialog fieldset:not(:first-child)').remove();
+		},
+		buttons: [{
+			id: "btn-ok",
+			text: "OK",
+			click: function () {
+				var cfg={};
+				$('fieldset').each(function(i, element) {
+					element=$(element);
+					cfg[element.find('legend').html()]= {
+						type: element.find('#tipo').val(),
+						freq: parseFloat(element.find('#freq').val())
+					};
+				});
+				console.log(cfg);
+				var url=new URL(window.location.href);
+				url.pathname=url.pathname.replace(/\/[^\/]*$/,'/cfg');
+				$.post(url,JSON.stringify(cfg));
+				$( "#dialog" ).dialog("close");
+			}
+		}]});
+	$('#configura').on( "click", function(event) {
+		var url=new URL(window.location.href);
+		
+		url.pathname=url.pathname.replace(/\/[^\/]*$/,'/cfg');
+		$.getJSON({ url:url }).done(function(cfg) {
+			var fieldset=null
+			//cfg['x']={type:'M20',freq:405};
+			for (i in cfg) {
+				fieldset= fieldset==null ? $('fieldset') : fieldset.clone().appendTo('#dialog');
+				fieldset.find('legend').html(i);
+				fieldset.find('#tipo').val(cfg[i].type);
+				fieldset.find('#freq').val(cfg[i].freq);
+			}
+			$('#dialog').dialog("open");
+		}).fail(function() {
+			alert('errore lettura configurazione server');
+		});
+	});
 	map = L.map('map').setView([44.4, 7.6], 11);
 	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
@@ -138,6 +194,21 @@ $(document).ready(function() {
 			<tbody>
 			</tbody>
 		</table>
+		<button id='configura' style='float:right'>configura</button>
+		<div id="dialog" title="Impostazioni">
+			<fieldset id='ttgo'>
+				<legend>pippo</legend> 
+				<label>Tipo: </label><select id='tipo'>
+					<option value='RS41'>RS41</option>
+					<option value='M20'>M20</option>
+					<option value='M10'>M10</option>
+					<option value='PIL'>PIL</option>
+					<option value='DFM'>DFM</option>
+				</select>
+				&nbsp;&nbsp;
+				<label></label>Frequenza: <input id='freq' type='number' value='403.700' min='400.000' max='406.000' step='0.1'/>
+			</fieldset>
+		</div>
 		<div id="map"></div>
 	</body>
 </html>

@@ -13,12 +13,13 @@ from urllib.parse import parse_qs
 
 hostName = "0.0.0.0"
 serverPort = 5556
-tipi =['RS41','M20','M10','PIL','DFM']
+tipi = ['RS41', 'M20', 'M10', 'PIL', 'DFM']
 data = {}
 fine = False
 files = []
 ttgo = {}
 ser = {}
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -33,20 +34,20 @@ class MyServer(SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         pass
-        
+
     def do_POST(self):
         if self.path == '/cfg':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = post_data.decode('utf-8')
-            #~ print(data)
+            # print(data)
             cfg = json.loads(data)
             self.send_response(200)
             self.end_headers()
             for i in cfg:
-                tipo=tipi.index(cfg[i]['type'])+1
-                cmd=f'o{{f={cfg[i]["freq"]}/tipo={tipo}}}o'
-                #~ print(cmd,flush=True)
+                tipo = tipi.index(cfg[i]['type']) + 1
+                cmd = f'o{{f={cfg[i]["freq"]}/tipo={tipo}}}o'
+                # print(cmd,flush=True)
                 ser[i].write(cmd.encode())
 
     def do_GET(self):
@@ -113,10 +114,13 @@ files = os.listdir(os.getcwd() + "/web")
 t = threading.Thread(target=webServerThread)
 t.start()
 
+# data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
+# [{'datetime': datetime.now().isoformat()+'Z',
+# 'lat':45,'lon':7.5,'alt': 3000,'rssi': 99}]}
 try:
     n = 0
     for i in range(len(sys.argv)-1):
-        ser[sys.argv[i+1]]=(serial.Serial(sys.argv[i+1], 9600))
+        ser[sys.argv[i+1]] = (serial.Serial(sys.argv[i+1], 9600))
         n += 1
     while True:
         for i in ser:

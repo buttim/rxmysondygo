@@ -9,6 +9,7 @@
 			integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
 			crossorigin=""/>
 		<script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"></script>
 		<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
 			integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
 			crossorigin=""></script>
@@ -21,11 +22,11 @@
 			table, th, td { border: 1px solid }
 			table thead {background-color:gray;color:white}
 			table tbody tr td {text-align:center}
-			table tbody tr td:nth-child(2) {text-align:right}
-			table tbody tr td:nth-child(4) {text-align:right}
+			table tbody tr td:nth-child(3) {text-align:right}
 			table tbody tr td:nth-child(5) {text-align:right}
 			table tbody tr td:nth-child(6) {text-align:right}
 			table tbody tr td:nth-child(7) {text-align:right}
+			table tbody tr td:nth-child(8) {text-align:right}
 			fieldset {
 				margin: 10px;
 				padding: 0 10px 10px;
@@ -36,6 +37,8 @@
 			.ui-dialog { z-index: 1000 !important ;}
 		</style>
 		<script>
+//TODO: cancelazione sonde dopo 6 ore
+//TODO: log per sonda
 "strict"
 var map;
 var last='';
@@ -54,19 +57,20 @@ function updateTable() {
 	for (id in data) {
 		var row=$(`#${id}`);
 		if (row.length==0) {
-			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
 			$('table tbody').append(row);
 		}
 		row.attr('id',id);
 		var cells=row.find('td');
 		var i=data[id].frames.length-1;
-		$(cells[0]).html(data[id].type);
-		$(cells[1]).html(data[id].freq);
-		$(cells[2]).html(id);
-		$(cells[3]).html(data[id].frames[i].lat);
-		$(cells[4]).html(data[id].frames[i].lon);
-		$(cells[5]).html(data[id].frames[i].alt);
-		$(cells[6]).html(data[id].frames[i].rssi);
+		$(cells[0]).html(timeago().format(data[id].frames[i].datetime,'IT'));
+		$(cells[1]).html(data[id].type);
+		$(cells[2]).html(data[id].freq);
+		$(cells[3]).html(id);
+		$(cells[4]).html(data[id].frames[i].lat);
+		$(cells[5]).html(data[id].frames[i].lon);
+		$(cells[6]).html(data[id].frames[i].alt);
+		$(cells[7]).html(data[id].frames[i].rssi);
 	}
 }
 
@@ -92,7 +96,9 @@ function getData() {
 						iconSize:[48,92],
 						iconAnchor: [24,92]
 					});
-					data[id].marker=L.marker(points[points.length-1],{icon:icon}).addTo(map);
+					data[id].marker=L.marker(points[points.length-1],{icon:icon})
+						.bindPopup(id)
+						.addTo(map);
 					last=newData[id].frames[points.length-1].datetime;
 					updateTable();
 				}
@@ -118,10 +124,26 @@ function getData() {
 	}).always(function() {
 		setTimeout(getData,3000);
 	});
-//~ 	last=new Date().toISOString()
 }
 
 $(document).ready(function() {
+	timeago.register('IT', (number, index, totalSec)=> {
+		return [
+			[ "adesso", "ora" ],
+			[ "meno di un minuto fa", "tra meno di un minuto" ],
+			[ "1 minuto fa", "tra 1 minuto" ],
+			[ "%s minuti fa", "tra %s minuti" ],
+			[ "un'ora fa","tra un'ora" ],
+			[ "%s ore fa", "tra %s ore" ],
+			[ "ieri","domani" ],
+			[ "%s giorni fa","tra %s giorni" ],
+			["un mese fa","tra un mese" ],
+			[ "%s mesi fa", "tra %s mesi" ],
+			[ "circa un anno fa", "tra un anno circa" ],
+			[ "%s anni fa", "tra %s anni" ]
+		][index];
+	});
+	timeago().setLocale('IT');
 	$('#configura').button();
 	$( "#dialog" ).dialog({
 		autoOpen:false,
@@ -182,6 +204,7 @@ $(document).ready(function() {
 		<table>
 			<thead>
 				<tr>
+					<th>Time</th>
 					<th>Type</th>
 					<th>Freq</th>
 					<th>ID</th>

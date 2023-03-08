@@ -4,7 +4,7 @@ import os
 import sys
 import threading
 import http.server
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import date
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
@@ -95,7 +95,8 @@ def webServerThread():
     webServer = ThreadingHTTPServer((hostName, serverPort), MyServer)
     while not fine:
         try:
-            webServer.serve_forever()
+            # webServer.serve_forever()
+            webServer.handle_request()
         except KeyboardInterrupt:
             break
         except Exception as x:
@@ -105,26 +106,47 @@ def webServerThread():
     webServer.server_close()
 
 
+def purge():
+    global data
+    d = (datetime.now() - timedelta(hours=6)).isoFormat()
+    data = {k: v for (k, v) in data.items() if v['frames'][-1]['datetime'] > d}
+
+
 if len(sys.argv) < 2:
     print("specificare i nomi delle porte seriali")
     exit(1)
 
 files = os.listdir(os.getcwd() + "/web")
 
-t = threading.Thread(target=webServerThread)
-t.start()
+thread = threading.Thread(target=webServerThread)
+thread.start()
 
 # data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
-# [{'datetime': datetime.now().isoformat()+'Z',
+# [{'datetime': datetime.now().isoformat(),
 # 'lat':45,'lon':7.5,'alt': 3000,'rssi': 99}]}
 try:
     n = 0
     for i in range(len(sys.argv)-1):
         ser[sys.argv[i+1]] = (serial.Serial(sys.argv[i+1], 9600))
         n += 1
+except serial.SerialException:
+    print(f'La seriale {sys.argv[n+1]} non esiste?')
+    fine = True
+    thread.join()
+    exit(1)
+
+try:
     while True:
         for i in ser:
-            s = ser[i].readline().decode().strip()
+            if ser[i] is None:
+                continue
+            try:
+                s = ser[i].readline().decode().strip()
+            except serial.SerialException as x:
+                print(f'Errore lettura seriale {ser[i].name}: {x}')
+                ser[i] = None
+                continue
+
             a = s.split('/')
 
             ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
@@ -134,7 +156,7 @@ try:
             if id == 'No data':
                 continue
             frame = {
-                'datetime': datetime.now().isoformat() + 'Z',
+                'datetime': datetime.now().isoformat(),
                 'lat': float(a[4]),
                 'lon': float(a[5]),
                 'alt': float(a[6]),
@@ -142,10 +164,12 @@ try:
             }
             if (id not in data):
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
+                purge()
             data[id]['frames'].append(frame)
-except serial.SerialException:
-    print(f'La seriale {sys.argv[n+1]} non esiste?')
+except KeyboardInterrupt:
+    print("Sto uscendo...")
     fine = True
+    thread.join()
 except Exception as x:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     print("line "+str(exc_tb.tb_lineno)+": "+str(x), file=sys.stderr)

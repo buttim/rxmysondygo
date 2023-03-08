@@ -18,6 +18,7 @@
 			html, body, table, #map {margin:0;padding:0}
 			html { font-family: Arial, Helvetica, sans-serif; }
 			#map { height: 90vh; clear:both }
+			#configura, #log { float:right }
 			table { height:10vh; border-collapse: collapse; width:80%;float:left }
 			table, th, td { border: 1px solid }
 			table thead {background-color:gray;color:white}
@@ -144,7 +145,8 @@ $(document).ready(function() {
 		][index];
 	});
 	timeago().setLocale('IT');
-	$('#configura').button();
+	$('#configura').button({ icon: "ui-icon-gear" });
+	$('#log').button({ icon: "ui-icon-comment" });
 	$( "#dialog" ).dialog({
 		autoOpen:false,
 		modal: true,
@@ -172,6 +174,9 @@ $(document).ready(function() {
 				$( "#dialog" ).dialog("close");
 			}
 		}]});
+	$('#log').on( "click", function(event) {
+		alert('Da fare...');
+	});
 	$('#configura').on( "click", function(event) {
 		var url=new URL(window.location.href);
 		
@@ -204,8 +209,8 @@ $(document).ready(function() {
 		<table>
 			<thead>
 				<tr>
-					<th>Time</th>
-					<th>Type</th>
+					<th>Tempo</th>
+					<th>Tipo</th>
 					<th>Freq</th>
 					<th>ID</th>
 					<th>Lat</th>
@@ -217,7 +222,8 @@ $(document).ready(function() {
 			<tbody>
 			</tbody>
 		</table>
-		<button id='configura' style='float:right'>configura</button>
+		<button id='configura'>configura</button>
+		<button id='log'>log</button>
 		<div id="dialog" title="Impostazioni">
 			<fieldset id='ttgo'>
 				<legend>pippo</legend> 

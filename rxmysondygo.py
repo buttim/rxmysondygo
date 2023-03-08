@@ -108,7 +108,7 @@ def webServerThread():
 
 def purge():
     global data
-    d = (datetime.now() - timedelta(hours=6)).isoFormat()
+    d = (datetime.now() - timedelta(hours=6)).isoformat()
     data = {k: v for (k, v) in data.items() if v['frames'][-1]['datetime'] > d}
 
 
@@ -122,7 +122,7 @@ thread = threading.Thread(target=webServerThread)
 thread.start()
 
 # data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
-# [{'datetime': datetime.now().isoformat(),
+# [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
 # 'lat':45,'lon':7.5,'alt': 3000,'rssi': 99}]}
 try:
     n = 0

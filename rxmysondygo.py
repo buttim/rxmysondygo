@@ -148,7 +148,8 @@ try:
                 continue
 
             a = s.split('/')
-
+            if len(a) < 4:
+                    continue
             ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
             if (a[0] != '1') or float(a[4]) == 0:
                 continue
@@ -163,8 +164,8 @@ try:
                 'rssi': float(a[8])
             }
             if (id not in data):
-                data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
                 purge()
+                data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             data[id]['frames'].append(frame)
 except KeyboardInterrupt:
     print("Sto uscendo...")
@@ -173,4 +174,5 @@ except KeyboardInterrupt:
 except Exception as x:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     print("line "+str(exc_tb.tb_lineno)+": "+str(x), file=sys.stderr)
-    sys.stderr.flush()
+    fine = True
+    thread.join()

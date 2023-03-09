@@ -38,7 +38,6 @@
 			.ui-dialog { z-index: 1000 !important ;}
 		</style>
 		<script>
-//TODO: cancelazione sonde dopo 6 ore
 //TODO: log per sonda
 "strict"
 var map;
@@ -96,7 +95,7 @@ function getData() {
 						iconUrl:`balloon-${color}.png`,
 						iconSize:[48,92],
 						iconAnchor: [24,92],
-						popupAnchor: [24,0]
+						popupAnchor: [0,-80]
 					});
 					data[id].marker=L.marker(points[points.length-1],{icon:icon})
 						.bindPopup(id)

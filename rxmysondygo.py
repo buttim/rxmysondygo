@@ -19,6 +19,7 @@ fine = False
 files = []
 ttgo = {}
 ser = {}
+dir = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 
 def json_serial(obj):
@@ -77,10 +78,10 @@ class MyServer(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(ttgo), "utf-8"))
             elif self.path == '/':
-                self.path = "web/rxmysondygo.html"
+                self.path =dir + "/web/rxmysondygo.html"
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             elif self.path.strip('/') in files:
-                self.path = "web" + self.path
+                self.path = dir + "/web" + self.path
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             else:
                 self.send_response(404)
@@ -116,7 +117,12 @@ if len(sys.argv) < 2:
     print("specificare i nomi delle porte seriali")
     exit(1)
 
-files = os.listdir(os.getcwd() + "/web")
+try:
+    os.mkdir(dir+'/log')
+except FileExistsError:
+    pass
+
+files = os.listdir(dir + "/web")
 
 thread = threading.Thread(target=webServerThread)
 thread.start()
@@ -132,7 +138,7 @@ try:
 except serial.SerialException:
     print(f'La seriale {sys.argv[n+1]} non esiste?')
     fine = True
-    thread.join()
+    thread.join(5)
     exit(1)
 
 try:
@@ -156,23 +162,31 @@ try:
             id = a[3]
             if id == 'No data':
                 continue
+            d = datetime.now().isoformat()
+            lat = float(a[4])
+            lon = float(a[5])
+            alt = float(a[6])
+            rssi = float(a[8])
             frame = {
-                'datetime': datetime.now().isoformat(),
-                'lat': float(a[4]),
-                'lon': float(a[5]),
-                'alt': float(a[6]),
-                'rssi': float(a[8])
+                'datetime': d,
+                'lat': lat,
+                'lon': lon,
+                'alt': alt,
+                'rssi': rssi
             }
             if (id not in data):
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             data[id]['frames'].append(frame)
+            with open(f'{dir}/log/{id}.log',"a") as f:
+                f.write(f'{d},{lat},{lon},{alt},{rssi}\n')
+            print(f'{d},{lat},{lon},{alt},{rssi}\n')
 except KeyboardInterrupt:
     print("Sto uscendo...")
     fine = True
-    thread.join()
+    thread.join(5)
 except Exception as x:
     exc_type, exc_obj, exc_tb = sys.exc_info()
     print("line "+str(exc_tb.tb_lineno)+": "+str(x), file=sys.stderr)
     fine = True
-    thread.join()
+    thread.join(5)

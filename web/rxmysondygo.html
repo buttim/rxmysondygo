@@ -57,16 +57,21 @@ function updateTable() {
 	for (id in data) {
 		var row=$(`#${id}`);
 		if (row.length==0) {
-			row=$('<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
+			row=$('<tr title="clicca per centrare mappa"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
 			$('table tbody').append(row);
 		}
 		row.attr('id',id);
+		row.on('click',row,(event)=> {
+			var lat=$(event.data).find('td:nth-child(5)').html();
+			var lon=$(event.data).find('td:nth-child(6)').html();
+			map.panTo(L.latLng(lat,lon));
+		});
 		var cells=row.find('td');
 		var i=data[id].frames.length-1;
 		$(cells[0]).html(timeago().format(data[id].frames[i].datetime,'IT'));
 		$(cells[1]).html(data[id].type);
 		$(cells[2]).html(data[id].freq);
-		$(cells[3]).html(id);
+		$(cells[3]).html(`<a title='vai su Radiosondy' href='https://radiosondy.info/sonde.php?sondenumber=${id}' target='_new'>${id}</a>`);
 		$(cells[4]).html(data[id].frames[i].lat);
 		$(cells[5]).html(data[id].frames[i].lon);
 		$(cells[6]).html(data[id].frames[i].alt);

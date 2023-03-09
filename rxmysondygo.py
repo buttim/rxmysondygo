@@ -78,10 +78,10 @@ class MyServer(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(ttgo), "utf-8"))
             elif self.path == '/':
-                self.path =dir + "/web/rxmysondygo.html"
+                self.path ="web/rxmysondygo.html"
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             elif self.path.strip('/') in files:
-                self.path = dir + "/web" + self.path
+                self.path =  "web" + self.path
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             else:
                 self.send_response(404)

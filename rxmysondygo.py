@@ -180,7 +180,6 @@ try:
             data[id]['frames'].append(frame)
             with open(f'{dir}/log/{id}.log',"a") as f:
                 f.write(f'{d},{lat},{lon},{alt},{rssi}\n')
-            print(f'{d},{lat},{lon},{alt},{rssi}\n')
 except KeyboardInterrupt:
     print("Sto uscendo...")
     fine = True

@@ -127,8 +127,8 @@ files = os.listdir(dir + "/web")
 thread = threading.Thread(target=webServerThread)
 thread.start()
 
-data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
-[{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
+# data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
+# [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
 
 try:
     n = 0

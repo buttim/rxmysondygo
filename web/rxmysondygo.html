@@ -67,8 +67,8 @@ function updateTable() {
 		}
 		row.attr('id',id);
 		row.on('click',row,(event)=> {
-			var lat=$(event.data).find('td:nth-child(5)').html();
-			var lon=$(event.data).find('td:nth-child(6)').html();
+			var lat=$(event.data).find('td:nth-child(5) a').text();
+			var lon=$(event.data).find('td:nth-child(6) a').text();
 			map.panTo(L.latLng(lat,lon));
 		});
 		var cells=row.find('td');
@@ -215,6 +215,27 @@ $(document).ready(function() {
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 	}).addTo(map);
 	map.locate({setView: true, maxZoom: 10});
+	map.on('click',e=>{
+		$.getJSON({
+				url:'http://buttim.asuscomm.com:8080/api/v1/lookup',
+				data: {
+					locations: `${e.latlng.lat},${e.latlng.lng}`
+				}
+			})
+			.done(res=>{
+				var lat=res.results[0].latitude,
+					lon=res.results[0].longitude,
+					ele=res.results[0].elevation;
+				var popup = L.popup()
+					.setLatLng(L.latLng(lat,lon))
+					.setContent(`${ele}m`)
+					.openOn(map);
+			})
+			.fail(()=>{
+				console.log('errore recupero altitudine');
+			});
+		console.log('click',e.latlng);
+	});
 	getData();
 });
 		</script>

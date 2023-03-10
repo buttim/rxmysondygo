@@ -127,8 +127,8 @@ files = os.listdir(dir + "/web")
 thread = threading.Thread(target=webServerThread)
 thread.start()
 
-# data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
-# [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
+data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
+[{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
 
 try:
     n = 0
@@ -157,13 +157,13 @@ try:
             if len(a) < 4:
                 continue
             ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
-            if (a[0] != '1') or float(a[4]) == 0:
-                continue
-            id = a[3]
-            if id == 'No data':
-                continue
-            d = datetime.now().isoformat()
             try:
+                if (a[0] != '1') or float(a[4]) == 0:
+                    continue
+                id = a[3]
+                if id == 'No data':
+                    continue
+                d = datetime.now().isoformat()
                 lat = float(a[4])
                 lon = float(a[5])
                 alt = float(a[6])

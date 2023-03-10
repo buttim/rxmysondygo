@@ -78,10 +78,10 @@ class MyServer(SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(bytes(json.dumps(ttgo), "utf-8"))
             elif self.path == '/':
-                self.path ="web/rxmysondygo.html"
+                self.path = "web/rxmysondygo.html"
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             elif self.path.strip('/') in files:
-                self.path =  "web" + self.path
+                self.path = "web" + self.path
                 http.server.SimpleHTTPRequestHandler.do_GET(self)
             else:
                 self.send_response(404)
@@ -129,7 +129,7 @@ thread.start()
 
 # data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
 # [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
-# 'lat':45,'lon':7.5,'alt': 3000,'rssi': 99}]}
+
 try:
     n = 0
     for i in range(len(sys.argv)-1):
@@ -155,7 +155,7 @@ try:
 
             a = s.split('/')
             if len(a) < 4:
-                    continue
+                continue
             ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
             if (a[0] != '1') or float(a[4]) == 0:
                 continue
@@ -163,10 +163,13 @@ try:
             if id == 'No data':
                 continue
             d = datetime.now().isoformat()
-            lat = float(a[4])
-            lon = float(a[5])
-            alt = float(a[6])
-            rssi = float(a[8])
+            try:
+                lat = float(a[4])
+                lon = float(a[5])
+                alt = float(a[6])
+                rssi = float(a[8])
+            except Exception:
+                continue
             frame = {
                 'datetime': d,
                 'lat': lat,
@@ -178,7 +181,7 @@ try:
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             data[id]['frames'].append(frame)
-            with open(f'{dir}/log/{id}.log',"a") as f:
+            with open(f'{dir}/log/{id}.log', "a") as f:
                 f.write(f'{d},{lat},{lon},{alt},{rssi}\n')
 except KeyboardInterrupt:
     print("Sto uscendo...")

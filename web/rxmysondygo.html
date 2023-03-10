@@ -19,6 +19,10 @@
 			html { font-family: Arial, Helvetica, sans-serif; }
 			#map { height: 90vh; clear:both }
 			#configura, #log { float:right }
+			a:link { text-decoration: none; }
+			a:visited { text-decoration: none; color:blue}
+			a:hover { text-decoration: none; }
+			a:active { text-decoration: none; }
 			table { height:10vh; border-collapse: collapse; width:80%;float:left }
 			table, th, td { border: 1px solid }
 			table thead {background-color:gray;color:white}
@@ -54,6 +58,7 @@ var colors=[
 var data=[];
 
 function updateTable() {
+	var n=0;
 	for (id in data) {
 		var row=$(`#${id}`);
 		if (row.length==0) {
@@ -72,10 +77,14 @@ function updateTable() {
 		$(cells[1]).html(data[id].type);
 		$(cells[2]).html(data[id].freq);
 		$(cells[3]).html(`<a title='vai su Radiosondy' href='https://radiosondy.info/sonde.php?sondenumber=${id}' target='_new'>${id}</a>`);
-		$(cells[4]).html(data[id].frames[i].lat);
-		$(cells[5]).html(data[id].frames[i].lon);
+		lat=data[id].frames[i].lat
+		lon=data[id].frames[i].lon
+		$(cells[4]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lat}</a>`);
+		$(cells[5]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lon}</a>`);
 		$(cells[6]).html(data[id].frames[i].alt);
 		$(cells[7]).html(data[id].frames[i].rssi);
+		$(cells[1]).css('background-color',colors[n++%colors.length]);
+		$(cells[1]).css('color',colors[n%colors.length]);
 	}
 }
 
@@ -91,7 +100,7 @@ function getData() {
 		for (id in newData) {
 			if (data[id]==null) {
 				data[id]=newData[id];
-				var color=colors[n++];
+				var color=colors[n++ %  colors.length];
 				var d=newData[id].frames;
 				points=d.map(x=>[x.lat,x.lon]);
 				data[id].path=L.polyline(points, {color: color}).addTo(map);
@@ -205,7 +214,7 @@ $(document).ready(function() {
 		maxZoom: 19,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 	}).addTo(map);
-
+	map.locate({setView: true, maxZoom: 10});
 	getData();
 });
 		</script>

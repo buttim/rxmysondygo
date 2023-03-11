@@ -61,6 +61,7 @@ class MyServer(SimpleHTTPRequestHandler):
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 start = params['from'][0] if 'from' in params else ''
+                print(start)
                 res = {
                     id: {
                         'type': sondeData['type'],
@@ -131,6 +132,9 @@ thread.start()
 # [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
 # 'lat':45,'lon':7,'alt':3000}]}
 
+##############################
+# data=json.load(open('p.json',"r"))
+##############################
 try:
     n = 0
     for i in range(len(sys.argv)-1):

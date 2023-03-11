@@ -125,9 +125,10 @@ function getData() {
 				if (i>=0) {
 					data[id].frames.push(...newData[id].frames);
 					var position=L.latLng(frames[i].lat,frames[i].lon);
-					console.log('position: ',position,frames[i]);
+					//console.log('position: ',position,frames[i]);
 					data[id].marker.setLatLng(position);
-					last=newData[id].frames[i].datetime;
+					if (newData[id].frames[i].datetime>last)
+						last=newData[id].frames[i].datetime;
 					updateTable();
 				}
 			}

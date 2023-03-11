@@ -42,7 +42,7 @@
 			.ui-dialog { z-index: 1000 !important ;}
 		</style>
 		<script>
-"strict"
+"strict";
 var map;
 var last='';
 var n=0;
@@ -113,7 +113,8 @@ function getData() {
 					data[id].marker=L.marker(points[points.length-1],{icon:icon})
 						.bindPopup(id)
 						.addTo(map);
-					last=newData[id].frames[points.length-1].datetime;
+					if (newData[id].frames[points.length-1].datetime>last)
+						last=newData[id].frames[points.length-1].datetime;
 					updateTable();
 				}
 			}

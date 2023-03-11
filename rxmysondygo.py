@@ -61,7 +61,6 @@ class MyServer(SimpleHTTPRequestHandler):
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 start = params['from'][0] if 'from' in params else ''
-                print(start)
                 res = {
                     id: {
                         'type': sondeData['type'],

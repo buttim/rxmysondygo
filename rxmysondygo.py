@@ -129,6 +129,7 @@ thread.start()
 
 # data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
 # [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
+# 'lat':45,'lon':7,'alt':3000}]}
 
 try:
     n = 0
@@ -154,10 +155,10 @@ try:
                 continue
 
             a = s.split('/')
-            if len(a) < 4:
-                continue
-            ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
             try:
+                if len(a) < 4:
+                    continue
+                ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
                 if (a[0] != '1') or float(a[4]) == 0:
                     continue
                 id = a[3]

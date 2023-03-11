@@ -42,7 +42,6 @@
 			.ui-dialog { z-index: 1000 !important ;}
 		</style>
 		<script>
-//TODO: log per sonda
 "strict"
 var map;
 var last='';
@@ -76,11 +75,11 @@ function updateTable() {
 		$(cells[0]).html(timeago().format(data[id].frames[i].datetime,'IT'));
 		$(cells[1]).html(data[id].type);
 		$(cells[2]).html(data[id].freq);
-		$(cells[3]).html(`<a title='vai su Radiosondy' href='https://radiosondy.info/sonde.php?sondenumber=${id}' target='_new'>${id}</a>`);
+		$(cells[3]).html(`<a title='vai su Radiosondy' href="https://radiosondy.info/sonde.php?sondenumber=${id}" target='_new'>${id}\x3C/a>`);
 		lat=data[id].frames[i].lat
 		lon=data[id].frames[i].lon
-		$(cells[4]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lat}</a>`);
-		$(cells[5]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lon}</a>`);
+		$(cells[4]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lat}\x3C/a>`);
+		$(cells[5]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lon}\x3C/a>`);
 		$(cells[6]).html(data[id].frames[i].alt);
 		$(cells[7]).html(data[id].frames[i].rssi);
 		$(cells[1]).css('background-color',colors[n++%colors.length]);
@@ -122,7 +121,6 @@ function getData() {
 				var frames=newData[id].frames;
 				for (i in frames)
 					data[id].path.addLatLng([frames[i].lat,frames[i].lon])
-//~ 				data[id].path.redraw();
 				var i=frames.length-1;
 				if (i>=0) {
 					data[id].frames.push(...newData[id].frames);
@@ -231,10 +229,9 @@ $(document).ready(function() {
 					.setContent(`${ele}m`)
 					.openOn(map);
 			})
-			.fail(()=>{
-				console.log('errore recupero altitudine');
+			.fail((jqxhr, textStatus, error)=>{
+				alert('errore recupero altitudine');
 			});
-		console.log('click',e.latlng);
 	});
 	getData();
 });

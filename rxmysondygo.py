@@ -131,9 +131,11 @@ thread.start()
 # [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
 # 'lat':45,'lon':7,'alt':3000}]}
 
-##############################
-# data=json.load(open('p.json',"r"))
-##############################
+try:
+    data=json.load(open('p.json',"r"))
+    print('dati di DEBUG!!!')
+except Exception:
+    pass
 try:
     n = 0
     for i in range(len(sys.argv)-1):

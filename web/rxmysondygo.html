@@ -8,6 +8,7 @@
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
 			integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
 			crossorigin=""/>
+		<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 		<script src='https://code.jquery.com/jquery-3.6.3.min.js'></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/timeago.js/2.0.2/timeago.min.js"></script>
 		<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
@@ -55,35 +56,32 @@ var colors=[
 	'yellow'
 ];
 var data=[];
+var template;
 
 function updateTable() {
 	var n=0;
 	for (id in data) {
-		var row=$(`#${id}`);
-		if (row.length==0) {
-			row=$('<tr title="clicca per centrare mappa"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>');
-			$('table tbody').append(row);
-		}
-		row.attr('id',id);
-		row.on('click',row,(event)=> {
-			var lat=$(event.data).find('td:nth-child(5) a').text();
-			var lon=$(event.data).find('td:nth-child(6) a').text();
-			map.panTo(L.latLng(lat,lon));
-		});
-		var cells=row.find('td');
 		var i=data[id].frames.length-1;
-		$(cells[0]).html(timeago().format(data[id].frames[i].datetime,'IT'));
-		$(cells[1]).html(data[id].type);
-		$(cells[2]).html(data[id].freq);
-		$(cells[3]).html(`<a title='vai su Radiosondy' href="https://radiosondy.info/sonde.php?sondenumber=${id}" target='_new'>${id}\x3C/a>`);
-		lat=data[id].frames[i].lat
-		lon=data[id].frames[i].lon
-		$(cells[4]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lat}\x3C/a>`);
-		$(cells[5]).html(`<a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/${lat},${lon}">${lon}\x3C/a>`);
-		$(cells[6]).html(data[id].frames[i].alt);
-		$(cells[7]).html(data[id].frames[i].rssi);
-		$(cells[1]).css('background-color',colors[n++%colors.length]);
-		$(cells[1]).css('color',colors[n%colors.length]);
+		var obj={
+			id:id,
+			type:data[id].type,
+			freq:data[id].freq,
+			datetime:data[id].frames[i].datetime,
+			background:colors[n++%colors.length],
+			color:colors[n%colors.length],
+			lat:data[id].frames[i].lat,
+			lon:data[id].frames[i].lon,
+			alt:data[id].frames[i].alt,
+			rssi:data[id].frames[i].rssi
+		};
+		
+		var row=$(`#${id}`);
+		var newRow=template(obj);
+		if (row.length==0)
+			$('table tbody').append(newRow);
+		else
+			row.replaceWith(newRow);
+		timeago().render($('.datetime'),'IT');
 	}
 }
 
@@ -115,7 +113,6 @@ function getData() {
 						.addTo(map);
 					if (newData[id].frames[points.length-1].datetime>last)
 						last=newData[id].frames[points.length-1].datetime;
-					updateTable();
 				}
 			}
 			else {
@@ -126,14 +123,13 @@ function getData() {
 				if (i>=0) {
 					data[id].frames.push(...newData[id].frames);
 					var position=L.latLng(frames[i].lat,frames[i].lon);
-					//console.log('position: ',position,frames[i]);
 					data[id].marker.setLatLng(position);
 					if (newData[id].frames[i].datetime>last)
 						last=newData[id].frames[i].datetime;
-					updateTable();
 				}
 			}
 		}
+		updateTable();
 	}).fail(function(jqxhr, textStatus, error ) {
 		console.log(textStatus,error);
 	}).always(function() {
@@ -142,6 +138,7 @@ function getData() {
 }
 
 $(document).ready(function() {
+	template=Handlebars.compile($('#template').html());
 	timeago.register('IT', (number, index, totalSec)=> {
 		return [
 			[ "adesso", "ora" ],
@@ -158,7 +155,6 @@ $(document).ready(function() {
 			[ "%s anni fa", "tra %s anni" ]
 		][index];
 	});
-	timeago().setLocale('IT');
 	$('#configura').button({ icon: "ui-icon-gear" });
 	$('#log').button({ icon: "ui-icon-comment" });
 	$( "#dialog" ).dialog({
@@ -197,7 +193,6 @@ $(document).ready(function() {
 		url.pathname=url.pathname.replace(/\/[^\/]*$/,'/cfg');
 		$.getJSON({ url:url }).done(function(cfg) {
 			var fieldset=null
-			//cfg['x']={type:'M20',freq:405};
 			for (i in cfg) {
 				fieldset= fieldset==null ? $('fieldset') : fieldset.clone().appendTo('#dialog');
 				fieldset.find('legend').html(i);
@@ -236,10 +231,23 @@ $(document).ready(function() {
 			});
 	});
 	getData();
+
 });
 		</script>
 	</head>
 	<body>
+		<script id='template' type="text/x-handlebars">
+			<tr id='{{id}}' title="clicca per centrare mappa">
+				<td class='datetime' datetime='{{datetime}}'>{{datetime}}</td>
+				<td style='background-color: {{background}}; color: {{color}}'>{{type}}</td>
+				<td>{{freq}}</td>
+				<td><a title='vai su Radiosondy' href='https://radiosondy.info/sonde.php?sondenumber={{id}}' target='_new'>{{id}}</a></td>
+				<td><a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/{{lat}},{{lon}}">{{lat}}</a></td>
+				<td><a title="clicca per lanciare Google Maps" target="_new" href="https://www.google.com/maps/search/{{lat}},{{lon}}">{{lon}}</a></td>
+				<td>{{alt}}</td>
+				<td>{{rssi}}</td>
+			</tr>
+		</script>
 		<table>
 			<thead>
 				<tr>

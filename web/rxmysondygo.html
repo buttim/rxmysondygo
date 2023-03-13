@@ -77,15 +77,15 @@ function updateTable() {
 		
 		var row=$(`#${id}`);
 		var newRow=$(template(obj));
-		newRow.on('click',row,(event) => {
-			var lat=$(event.data).find('td:nth-child(5) a').text();
-			var lon=$(event.data).find('td:nth-child(6) a').text();
-			map.panTo(L.latLng(lat,lon));
-		});
 		if (row.length==0)
 			$('table tbody').append(newRow);
 		else
 			row.replaceWith(newRow);
+		newRow.on('click',newRow,(event) => {
+			var lat=$(event.data).find('td:nth-child(5) a').text();
+			var lon=$(event.data).find('td:nth-child(6) a').text();
+			map.panTo(L.latLng(lat,lon));
+		});
 		timeago().render($('.datetime'),'IT');
 	}
 }

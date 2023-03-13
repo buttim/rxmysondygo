@@ -67,13 +67,14 @@ function updateTable() {
 			type:data[id].type,
 			freq:data[id].freq,
 			datetime:data[id].frames[i].datetime,
-			background:colors[n++%colors.length],
-			color:colors[n%colors.length],
+			background:colors[n%colors.length],
+			color:colors[(n+1)%colors.length],
 			lat:data[id].frames[i].lat,
 			lon:data[id].frames[i].lon,
 			alt:data[id].frames[i].alt,
 			rssi:data[id].frames[i].rssi
 		};
+		n++;
 		
 		var row=$(`#${id}`);
 		var newRow=$(template(obj));

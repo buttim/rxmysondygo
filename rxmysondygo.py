@@ -2,6 +2,7 @@ import serial
 import json
 import os
 import sys
+import math
 import threading
 import http.server
 from datetime import datetime, timedelta
@@ -20,6 +21,17 @@ files = []
 ttgo = {}
 ser = {}
 dir = os.path.dirname(os.path.abspath(sys.argv[0]))
+R = 6371
+
+
+def distance(lat1, lon1, lat2, lon2):
+    lat1 = lat1 / 180 * math.pi
+    lat2 = lat2 / 180 * math.pi
+    lon1 = lon1 / 180 * math.pi
+    lon2 = lon2 / 180 * math.pi
+    return math.acos((math.sin(lat1) * math.sin(lat2)) +
+                     (math.cos(lat1) * math.cos(lat2) *
+                     math.cos((lon1 - lon2)))) * R
 
 
 def json_serial(obj):
@@ -127,12 +139,8 @@ files = os.listdir(dir + "/web")
 thread = threading.Thread(target=webServerThread)
 thread.start()
 
-# data['XXXXXXX']={'type': 'RS41','freq': 409,'frames':
-# [{'datetime': (datetime.now()-timedelta(hours=13)).isoformat(),
-# 'lat':45,'lon':7,'alt':3000}]}
-
 try:
-    data=json.load(open('p.json',"r"))
+    data = json.load(open('dfm.json', "r"))
     print('dati di DEBUG!!!')
 except Exception:
     pass
@@ -163,6 +171,8 @@ try:
             try:
                 if len(a) < 4:
                     continue
+                if a[1] not in tipi:
+                    continue
                 ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
                 if (a[0] != '1') or float(a[4]) == 0:
                     continue
@@ -174,6 +184,8 @@ try:
                 lon = float(a[5])
                 alt = float(a[6])
                 rssi = float(a[8])
+                if lat < -360 or lat > 360 or lon < -90 or lon > 90:
+                    continue
             except Exception:
                 continue
             frame = {
@@ -186,6 +198,11 @@ try:
             if (id not in data):
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
+            else:
+                lastFrame = data[i]['frames'][-1]
+                d = distance(lat, lon, lastFrame['lat'], lastFrame['lon'])
+                if d > 1000:
+                    continue
             data[id]['frames'].append(frame)
             with open(f'{dir}/log/{id}.log', "a") as f:
                 f.write(f'{d},{lat},{lon},{alt},{rssi}\n')

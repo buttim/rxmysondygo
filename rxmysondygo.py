@@ -200,7 +200,10 @@ try:
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             elif len(data[id]['frames']) > 0:
                 lastFrame = data[id]['frames'][-1]
-                d = distance(lat, lon, lastFrame['lat'], lastFrame['lon'])
+                try:
+                    d = distance(lat, lon, lastFrame['lat'], lastFrame['lon'])
+                except Exception:
+                    continue
                 if d > 1000:
                     continue
             data[id]['frames'].append(frame)

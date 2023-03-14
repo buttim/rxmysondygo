@@ -121,7 +121,7 @@ def webServerThread():
 
 def purge():
     global data
-    d = (datetime.now() - timedelta(hours=6)).isoformat()
+    d = (datetime.now() - timedelta(hours=12)).isoformat()
     data = {k: v for (k, v) in data.items() if v['frames'][-1]['datetime'] > d}
 
 
@@ -195,11 +195,11 @@ try:
                 'alt': alt,
                 'rssi': rssi
             }
-            if (id not in data):
+            if id not in data:
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
-            else:
-                lastFrame = data[i]['frames'][-1]
+            elif len(data[id]['frames']) > 0:
+                lastFrame = data[id]['frames'][-1]
                 d = distance(lat, lon, lastFrame['lat'], lastFrame['lon'])
                 if d > 1000:
                     continue

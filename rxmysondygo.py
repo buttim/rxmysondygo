@@ -10,7 +10,7 @@ from datetime import date
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-
+from pushbullet import PushBullet
 
 hostName = "0.0.0.0"
 serverPort = 5556
@@ -124,10 +124,33 @@ def purge():
     d = (datetime.now() - timedelta(hours=12)).isoformat()
     data = {k: v for (k, v) in data.items() if v['frames'][-1]['datetime'] > d}
 
+def initPushbullet():
+    apiKey = os.getenv("pushbullet_apikey")
+    device = os.getenv("pushbullet_device")
+    while 1:
+        try:
+            p=PushBullet(apiKey)
+            break
+        except:
+            time.sleep(30)
+            pass
+
+    listener = None
+    for d in p.devices:
+            if d.device_iden == device:
+                    listener=d
+                    break
+    if listener==None:
+            listener=p.new_device(device)
+    return p
 
 if len(sys.argv) < 2:
     print("specificare i nomi delle porte seriali")
     exit(1)
+    
+print("inizializzazione pushbullet...")
+pushbullet = initPushbullet()
+print("inizializzazione pushbullet effettuata")
 
 try:
     os.mkdir(dir+'/log')
@@ -195,7 +218,8 @@ try:
                 'alt': alt,
                 'rssi': rssi
             }
-            if id not in data:
+            if id not in data:  # nuova sonda
+                pushbullet.push_note("rxmysondygo",f'Nuova sonda {a[1]}, {id} ({a[2]}MHz)')
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             elif len(data[id]['frames']) > 0:

@@ -24,6 +24,7 @@
 			a:visited { text-decoration: none; color:blue}
 			a:hover { text-decoration: none; }
 			a:active { text-decoration: none; }
+			input[type=number] { width:9ch }
 			table { height:10vh; border-collapse: collapse; width:80%;float:left }
 			table, th, td { border: 1px solid }
 			table thead {background-color:gray;color:white}
@@ -165,9 +166,14 @@ $(document).ready(function() {
 	$('#log').button({ icon: "ui-icon-comment" });
 	$( "#dialog" ).dialog({
 		autoOpen:false,
+		position: {
+			my: "top",
+			at: "top+50px",
+			of: window
+		},
 		modal: true,
 		minHeight: 300,
-		minWidth: 400,
+		minWidth: 370,
 		close: function() {
 			$('#dialog fieldset:not(:first-child)').remove();
 		},
@@ -283,7 +289,7 @@ $(document).ready(function() {
 					<option value='DFM'>DFM</option>
 				</select>
 				&nbsp;&nbsp;
-				<label></label>Frequenza: <input id='freq' type='number' value='403.700' min='400.000' max='406.000' step='0.1'/>
+				<label>Frequenza: </label><input id='freq' type='number' value='403.700' min='400.000' max='406.000' step='0.1'/>
 			</fieldset>
 		</div>
 		<div id="map"></div>

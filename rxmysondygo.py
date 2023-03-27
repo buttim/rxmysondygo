@@ -1,5 +1,6 @@
 import serial
 import json
+import time
 import os
 import sys
 import math
@@ -124,30 +125,32 @@ def purge():
     d = (datetime.now() - timedelta(hours=12)).isoformat()
     data = {k: v for (k, v) in data.items() if v['frames'][-1]['datetime'] > d}
 
+
 def initPushbullet():
     apiKey = os.getenv("pushbullet_apikey")
     device = os.getenv("pushbullet_device")
     while 1:
         try:
-            p=PushBullet(apiKey)
+            p = PushBullet(apiKey)
             break
-        except:
+        except Exception:
             time.sleep(30)
             pass
 
     listener = None
     for d in p.devices:
-            if d.device_iden == device:
-                    listener=d
-                    break
-    if listener==None:
-            listener=p.new_device(device)
+        if d.device_iden == device:
+            listener = d
+            break
+    if listener is None:
+        listener = p.new_device(device)
     return p
+
 
 if len(sys.argv) < 2:
     print("specificare i nomi delle porte seriali")
     exit(1)
-    
+
 print("inizializzazione pushbullet...")
 pushbullet = initPushbullet()
 print("inizializzazione pushbullet effettuata")
@@ -196,7 +199,8 @@ try:
                     continue
                 if a[1] not in tipi:
                     continue
-                ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
+                if ser[i].name not in ttgo:
+                    ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
                 if (a[0] != '1') or float(a[4]) == 0:
                     continue
                 id = a[3]
@@ -219,7 +223,7 @@ try:
                 'rssi': rssi
             }
             if id not in data:  # nuova sonda
-                pushbullet.push_note("rxmysondygo",f'Nuova sonda {a[1]}, {id} ({a[2]}MHz)')
+                pushbullet.push_note("rxmysondygo", f'Nuova sonda {a[1]}, {id} ({a[2]}MHz)')
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             elif len(data[id]['frames']) > 0:

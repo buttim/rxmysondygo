@@ -223,7 +223,12 @@ try:
                 'rssi': rssi
             }
             if id not in data:  # nuova sonda
-                pushbullet.push_note("rxmysondygo", f'Nuova sonda {a[1]}, {id} ({a[2]}MHz)')
+                try:
+                    pushbullet.push_note("rxmysondygo", f'Nuova sonda {a[1]}, {id} ({a[2]}MHz)')
+                except Exception as x:
+                    print("Impossibile inviare notifica pushbullet",
+                          file=sys.stderr)
+                    print(str(x), file=sys.stderr)
                 purge()
                 data[id] = {'type': a[1], 'freq': a[2], 'frames': []}
             elif len(data[id]['frames']) > 0:

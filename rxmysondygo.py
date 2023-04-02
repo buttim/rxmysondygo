@@ -199,8 +199,7 @@ try:
                     continue
                 if a[1] not in tipi:
                     continue
-                if ser[i].name not in ttgo:
-                    ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
+                ttgo[ser[i].name] = {'type': a[1], 'freq': float(a[2])}
                 if (a[0] != '1') or float(a[4]) == 0:
                     continue
                 id = a[3]

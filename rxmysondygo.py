@@ -192,6 +192,9 @@ try:
                 print(f'Errore lettura seriale {ser[i].name}: {x}')
                 ser[i] = None
                 continue
+            except Exception:
+                print('Linea malformata ignorata')
+                continue
 
             a = s.split('/')
             try:

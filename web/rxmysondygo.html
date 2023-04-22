@@ -70,14 +70,14 @@ function updateTable() {
 			datetime:data[id].frames[i].datetime,
 			background:colors[n%colors.length],
 			color:colors[(n+1)%colors.length],
-			lat:data[id].frames[i].lat,
-			lon:data[id].frames[i].lon,
-			alt:data[id].frames[i].alt,
-			rssi:data[id].frames[i].rssi
+			lat:data[id].frames[i].lat.toFixed(5),
+			lon:data[id].frames[i].lon.toFixed(5),
+			alt:data[id].frames[i].alt.toFixed(1),
+			rssi:data[id].frames[i].rssi.toFixed(1)
 		};
 		n++;
 		
-		var row=$(`#${id}`);
+		var row=$(`#${id.replace(".","\\.")}`);
 		var newRow=$(template(obj));
 		if (row.length==0)
 			$('table tbody').append(newRow);
@@ -88,7 +88,6 @@ function updateTable() {
 			var lon=$(event.data).find('td:nth-child(6) a').text();
 			map.panTo(L.latLng(lat,lon));
 		});
-		timeago().render($('.datetime'),'IT');
 	}
 }
 
@@ -140,11 +139,15 @@ function getData() {
 	}).fail(function(jqxhr, textStatus, error ) {
 		console.log(textStatus,error);
 	}).always(function() {
+		timeago().render($('.datetime'),'IT');
 		setTimeout(getData,3000);
 	});
 }
 
 $(document).ready(function() {
+	window.addEventListener('popstate', function(event) {
+		$( "#dialog" ).dialog("close");
+	});
 	template=Handlebars.compile($('#template').html());
 	timeago.register('IT', (number, index, totalSec)=> {
 		return [
@@ -211,6 +214,7 @@ $(document).ready(function() {
 				fieldset.find('#tipo').val(cfg[i].type);
 				fieldset.find('#freq').val(cfg[i].freq);
 			}
+			history.pushState(null, null, window.location.pathname);
 			$('#dialog').dialog("open");
 		}).fail(function() {
 			alert('errore lettura configurazione server');
@@ -277,7 +281,7 @@ $(document).ready(function() {
 			</tbody>
 		</table>
 		<button id='configura'>configura</button>
-		<button id='log'>log</button>
+		<button id='log' style='display:none'>log</button>
 		<div id="dialog" title="Impostazioni">
 			<fieldset id='ttgo'>
 				<legend>pippo</legend> 

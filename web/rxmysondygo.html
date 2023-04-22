@@ -220,12 +220,21 @@ $(document).ready(function() {
 			alert('errore lettura configurazione server');
 		});
 	});
-	map = L.map('map').setView([44.4, 7.6], 11);
-	L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	var osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-	}).addTo(map);
-	map.locate({setView: true, maxZoom: 10});
+	});
+	var cyclo=L.tileLayer(
+		'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
+		maxZoom: 18,
+	});
+	var satellite=L.tileLayer(
+		'https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/{z}/{x}/{y}?access_token=sk.eyJ1IjoiYnV0dGltIiwiYSI6ImNsOG9ydTRsajBhd2kzcXJ1dTZwazI0YXQifQ.2zwAGXykU272aRDBHHshtg', {
+		maxZoom: 18,
+	});
+	map = L.map('map', {center:[44.4, 7.6],zoom:11,layers:[osm]});	
+	var maps = { "OpenStreeMap": osm, "CycloMap": cyclo, "Mapbox satellite": satellite };	
+	var layerControl = L.control.layers(maps).addTo(map);	map.locate({setView: true, maxZoom: 10});
 	map.on('click',e=>{
 		$.getJSON({
 				url:'http://buttim.asuscomm.com:8080/api/v1/lookup',

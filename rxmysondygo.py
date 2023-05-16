@@ -206,7 +206,7 @@ try:
                 if (a[0] != '1') or float(a[4]) == 0:
                     continue
                 id = a[3]
-                if id == 'No data':
+                if id == 'No data' or id.startswith('?'):
                     continue
                 d = datetime.now().isoformat()
                 lat = float(a[4])

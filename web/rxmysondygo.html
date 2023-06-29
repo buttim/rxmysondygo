@@ -199,6 +199,12 @@ $(document).ready(function() {
 				$( "#dialog" ).dialog("close");
 			}
 		}]});
+	$( "#dialog" ).keydown(function (event) {
+		if (event.keyCode == $.ui.keyCode.ENTER) {
+			$(this).parent().find("button:eq(0)").trigger("click");
+			return false;
+		}
+	});
 	$('#log').on( "click", function(event) {
 		alert('Da fare...');
 	});
